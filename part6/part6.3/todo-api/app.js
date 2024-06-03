@@ -3,7 +3,10 @@ import { cacheMethodCalls } from './utils/cacheUtil.js';
 
 const portConfig = { port: 7777 };
 
-const cachedTodoService = cacheMethodCalls(todoService, ['addItem']);
+const cachedTodoService = cacheMethodCalls(todoService, [
+  'addItem',
+  'deleteItem',
+]);
 
 const handleGetRoot = async (request) => {
   return new Response('Hello world at root!');
