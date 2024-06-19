@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+const id = Astro.params.id || '1';
+
+export const prerender = true;
+export const getStaticPaths = () => {
+  return [
+    { params: { id: '1' } },
+    { params: { id: '2' } },
+    { params: { id: '3' } },
+    { params: { id: '4' } },
+  ];
+};
+---
+
+<Layout id={id} buttonText='Next' />

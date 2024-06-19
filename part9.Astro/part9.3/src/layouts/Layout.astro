@@ -1,0 +1,14 @@
+---
+const id = Astro.props.id || '0';
+const buttonText = Astro.props.buttonText || 'Start';
+---
+
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+  </head>
+  <body>
+    <p>You are at {id}</p>
+    <a href={`/${parseInt(id) + 1}`}>{buttonText}</a>
+  </body>
+</html>
