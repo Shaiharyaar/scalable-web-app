@@ -1,27 +1,22 @@
-import * as programmingAssignmentService from "./services/programmingAssignmentService.js";
-import { serve } from "./deps.js";
-import { sql } from "./database/database.js";
+import { Application, createClient } from './deps.js';
+import assignmentRouter from './routers/assignmentRouter.js';
 
-const handleRequest = async (request) => {
-  const programmingAssignments = await programmingAssignmentService.findAll();
+// initiating redis client for stream
+export const client = createClient({
+  url: 'redis://redis:6379',
+  pingInterval: 1000,
+});
 
-  const requestData = await request.json();
-  const testCode = programmingAssignments[0]["test_code"];
-  const data = {
-    testCode: testCode,
-    code: requestData.code,
-  };
+await client.connect();
 
-  const response = await fetch("http://grader-api:7000/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+const app = new Application();
 
-  return response;
-};
+app.use(async ({ request, state }, next) => {
+  console.log('got the call');
+  state.user = request.headers.get('Authorization');
+  await next();
+});
 
-const portConfig = { port: 7777, hostname: "0.0.0.0" };
-serve(handleRequest, portConfig);
+app.use(assignmentRouter.routes());
+
+await app.listen({ port: 7777, hostname: '0.0.0.0' });

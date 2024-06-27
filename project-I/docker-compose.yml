@@ -40,6 +40,19 @@ services:
       - 3000
     depends_on:
       - programming-api
+      - sse-server
+
+  sse-server:
+    build: sse-server
+    image: sse-server
+    restart: "no"
+    volumes:
+      - ./sse-server/:/app
+      - ./app-cache/:/app-cache
+    expose:
+      - 5050
+    env_file:
+      - project.env
 
   grader-api:
     build: grader-api
@@ -78,3 +91,11 @@ services:
       - nginx
     volumes:
       - ./e2e-playwright/tests:/e2e-playwright/tests
+
+  redis:
+    image: redis:latest
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    expose:
+      - 6379
