@@ -6,7 +6,8 @@
 
   $: {
     maxPoints = $assignments.length * 100;
-    points = $assignments.filter((a) => a.completed).length * 100;
+    points =
+      $assignments.filter((assignment) => assignment.completed).length * 100;
   }
 </script>
 

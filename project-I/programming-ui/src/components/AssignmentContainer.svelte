@@ -1,5 +1,5 @@
 <script>
-  import { userUuid, setAssignmentsStore } from '../stores/stores';
+  import { userUuid, updatedAssignments } from '../stores/stores';
   import { onMount, onDestroy } from 'svelte';
   import GradingButton from './GradingButton.svelte';
   import CodingTextarea from './CodingTextarea.svelte';
@@ -23,7 +23,7 @@
       if (obj.correct) {
         showFeedback = true;
         feedback = successFeedback;
-        await setAssignmentsStore();
+        await updatedAssignments();
         return;
       }
       showFeedback = true;
@@ -77,19 +77,25 @@
   {#if assignment}
     <div class="flex lg:flex-row flex-col gap-5">
       <div class="flex flex-col gap-2">
-        <h5 class="font-bold mt-4">Assignment:</h5>
-        <p id="assignment-test-container">{assignment.handout}</p>
+        <h4 class="font-bold mt-4">Assignment</h4>
+        <p id="assignment-test-container" class="text-gray-400">
+          {assignment.handout}
+        </p>
       </div>
       <div class="flex flex-col gap-2 w-full">
-        <CodingTextarea bind:code disabled={pending} />
-        <GradingButton {submitCode} disabled={pending}>Submit</GradingButton>
+        <div
+          class="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"
+        >
+          <CodingTextarea bind:code disabled={pending} />
+          <GradingButton {submitCode} disabled={pending}>Submit</GradingButton>
+        </div>
         {#if showFeedback}
           <code
             id="submission-feedback-container"
-            class={`relative ${feedback == successFeedback ? 'bg-green-500' : 'bg-red-500'} mt-2 text-white p-4 rounded-xl`}
+            class={`relative ${feedback == successFeedback ? 'bg-green-500' : 'bg-red-500'} mt-2 text-white px-4 py-8 rounded-lg`}
           >
             <button
-              class="absolute top-3 right-3 z-10 cursor-pointer"
+              class="absolute top-6 right-6 z-10 cursor-pointer"
               on:click={hideFeedback}
             >
               <svg
@@ -114,7 +120,7 @@
             </button>
 
             {#if feedback != successFeedback}
-              Your submission was incorrect <br />
+              Your submission is incorrect! <br />
             {/if}
             {feedback}
           </code>

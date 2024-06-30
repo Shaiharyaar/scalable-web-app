@@ -25,13 +25,12 @@ router.get('/', (ctx) => {
   clients.delete(user);
   clients.set(user, target);
 
+  const e = new ServerSentEvent('init', { data: 'Server has started!' });
+  target.dispatchEvent(e);
+
   target.addEventListener('close', () => {
     console.log('Connection closed');
   });
-
-  const e = new ServerSentEvent('init', { data: 'hello from server' });
-
-  target.dispatchEvent(e);
 });
 
 app.use(router.routes());

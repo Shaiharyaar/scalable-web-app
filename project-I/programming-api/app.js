@@ -12,7 +12,6 @@ await client.connect();
 const app = new Application();
 
 app.use(async ({ request, state }, next) => {
-  console.log('got the call');
   state.user = request.headers.get('Authorization');
   await next();
 });

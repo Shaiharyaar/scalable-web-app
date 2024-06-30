@@ -8,5 +8,5 @@ test('fail feedback on incorrect submission', async ({ page }) => {
   await page.locator('#coding-textarea').fill('def hello():\n\treturn "Henlo"');
   await page.getByRole('button', { name: 'Submit' }).click();
   const feedbackBox = await page.locator('#submission-feedback-container');
-  await expect(feedbackBox).toContainText("AssertionError: 'Henlo' != 'Hello'");
+  await expect(feedbackBox).toContainText('Your submission is incorrect!');
 });

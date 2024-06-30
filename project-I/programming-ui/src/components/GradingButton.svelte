@@ -4,7 +4,8 @@
 </script>
 
 <button
-  class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded disabled:bg-gray-500"
+  type="submit"
+  class="inline-flex items-center py-2.5 px-4 w-full text-xs justify-center font-medium text-center text-white bg-green-700 focus:ring-4 focus:ring-green-200 dark:focus:ring-green-900 hover:bg-green-800 disabled:bg-gray-500 disabled:cursor-not-allowed outline-none"
   {disabled}
   on:click={submitCode}
 >

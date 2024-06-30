@@ -24,8 +24,6 @@ try {
   console.log('Consumer group already exists, skipped creation.');
 }
 
-console.log(`Starting consumer submissions-${consumerName}.`);
-
 while (true) {
   try {
     const response = await client.XREADGROUP(
@@ -53,8 +51,6 @@ while (true) {
         'assignment_submissions_group',
         id
       );
-      console.log(`Acknowledged processing of entry ${id}.`);
-
       const submissionData = response[0].messages[0].message;
       const { code, testCode, submissionId, user } = submissionData;
 

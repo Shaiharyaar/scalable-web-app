@@ -9,37 +9,37 @@ const router = new Router();
 const assignmentCachedService = cacheMethodCalls(assignmentService, []);
 
 router.get('/getAssignments', async ({ response, state }) => {
+  const { user } = state;
   const assignments = await assignmentCachedService.getAll();
   const submissions = await assignmentSubmissionService.getSubmissionsByUser(
-    state.user
+    user
   );
-  const completedSubmissionsIds = submissions
-    .filter((s) => s.correct)
-    .map((s) => s.programming_assignment_id);
+  const completeSubmissionIdsList = submissions
+    .filter((sub) => sub.correct)
+    .map((sub) => sub.programming_assignment_id);
 
-  response.body = assignments.map((a) => ({
-    ...a,
-    completed: completedSubmissionsIds.includes(a.id),
+  response.body = assignments.map((assignment) => ({
+    ...assignment,
+    completed: completeSubmissionIdsList.includes(assignment.id),
   }));
 });
 
 router.post('/submissions', async ({ request, response, state }) => {
   const body = request.body({ type: 'json' });
   const { assignmentNumber, code } = await body.value;
+  const { user } = state;
 
-  // const areSubmissionsPending =
-  //   await assignmentSubmissionService.checkForPendingSubmissions(state.user);
-  // console.log({ areSubmissionsPending });
-  // if (areSubmissionsPending) {
-  //   console.log('There are pending submissions');
-  //   return (response.status = 400);
-  // }
+  // check if user has any pending submissions
+  const areSubmissionsPending =
+    await assignmentSubmissionService.hasPendingSubmissions(user);
 
-  const assignment = await assignmentCachedService.findByNumber(
+  if (areSubmissionsPending) {
+    return (response.status = 400);
+  }
+
+  const assignment = await assignmentCachedService.findAssignment(
     assignmentNumber
   );
-
-  console.log({ assignment });
 
   if (!assignment) {
     response.body = { error: 'invalid assignment number' };
@@ -48,31 +48,29 @@ router.post('/submissions', async ({ request, response, state }) => {
 
   const { id: assignmentId, test_code } = assignment;
 
-  const newSubmission = await assignmentSubmissionService.postSubmission(
+  const newSubmission = await assignmentSubmissionService.addSubmission(
     assignmentId,
     code,
     state.user
   );
 
-  const similarSubmission = await assignmentSubmissionService.findSimilar(
-    assignmentId,
-    code
-  );
+  // check if same submission has been made before
+  const hasSimilarSubmission =
+    await assignmentSubmissionService.findSameAssignment(assignmentId, code);
 
-  if (similarSubmission) {
+  if (hasSimilarSubmission) {
     console.log('Similar submission found');
     const resultObject = {
       code,
-      feedback: similarSubmission.grader_feedback,
+      feedback: hasSimilarSubmission.grader_feedback,
       submissionId: newSubmission.id.toString(),
       user: state.user,
     };
 
+    // adding data in redis stream
     await client.XADD('submission_results', '*', resultObject);
     return (response.status = 200);
   }
-
-  console.log('No similar submissions found');
 
   const data = {
     code,
@@ -81,6 +79,7 @@ router.post('/submissions', async ({ request, response, state }) => {
     submissionId: newSubmission.id.toString(),
   };
 
+  // adding data in redis stream
   await client.XADD('assignment_submissions', '*', data);
   return (response.status = 200);
 });
