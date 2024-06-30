@@ -1,19 +1,16 @@
 import { Router } from '../deps.js';
 import * as assignmentService from '../services/assignmentService.js';
+import * as assignmentSubmissionService from '../services/assignmentSubmissionService.js';
 import { cacheMethodCalls } from '../utils/cacheUtil.js';
+import { client } from '../app.js';
 
 const router = new Router();
 
-const assignmentCachedService = cacheMethodCalls(assignmentService, [
-  'addAssignment',
-  'postSubmission',
-  'getSubmissionsByUser',
-  'checkForPendingSubmissions',
-  'findSimilar',
-]);
+const assignmentCachedService = cacheMethodCalls(assignmentService, []);
+
 router.get('/getAssignments', async ({ response, state }) => {
-  const assignments = await assignmentCachedService.findAll();
-  const submissions = await assignmentCachedService.getSubmissionsByUser(
+  const assignments = await assignmentCachedService.getAll();
+  const submissions = await assignmentSubmissionService.getSubmissionsByUser(
     state.user
   );
   const completedSubmissionsIds = submissions
@@ -30,16 +27,19 @@ router.post('/submissions', async ({ request, response, state }) => {
   const body = request.body({ type: 'json' });
   const { assignmentNumber, code } = await body.value;
 
-  const areSubmissionsPending =
-    await assignmentCachedService.checkForPendingSubmissions(state.user);
-  if (areSubmissionsPending) {
-    console.log('There are pending submissions');
-    return (response.status = 400);
-  }
+  // const areSubmissionsPending =
+  //   await assignmentSubmissionService.checkForPendingSubmissions(state.user);
+  // console.log({ areSubmissionsPending });
+  // if (areSubmissionsPending) {
+  //   console.log('There are pending submissions');
+  //   return (response.status = 400);
+  // }
 
   const assignment = await assignmentCachedService.findByNumber(
     assignmentNumber
   );
+
+  console.log({ assignment });
 
   if (!assignment) {
     response.body = { error: 'invalid assignment number' };
@@ -48,13 +48,13 @@ router.post('/submissions', async ({ request, response, state }) => {
 
   const { id: assignmentId, test_code } = assignment;
 
-  const newSubmission = await assignmentCachedService.postSubmission(
+  const newSubmission = await assignmentSubmissionService.postSubmission(
     assignmentId,
     code,
     state.user
   );
 
-  const similarSubmission = await assignmentCachedService.findSimilar(
+  const similarSubmission = await assignmentSubmissionService.findSimilar(
     assignmentId,
     code
   );
@@ -68,7 +68,7 @@ router.post('/submissions', async ({ request, response, state }) => {
       user: state.user,
     };
 
-    await client.XADD('results', '*', resultObject);
+    await client.XADD('submission_results', '*', resultObject);
     return (response.status = 200);
   }
 
@@ -81,7 +81,7 @@ router.post('/submissions', async ({ request, response, state }) => {
     submissionId: newSubmission.id.toString(),
   };
 
-  await client.XADD('submissions', '*', data);
+  await client.XADD('assignment_submissions', '*', data);
   return (response.status = 200);
 });
 

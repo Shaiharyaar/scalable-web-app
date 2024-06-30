@@ -23,4 +23,9 @@ const getAssignments = async () => {
   return data;
 };
 
+export const setAssignmentsStore = async () => {
+  const data = await getAssignments();
+  assignments.set(data);
+};
+
 export const userUuid = readable(user);

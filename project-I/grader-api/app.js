@@ -1,20 +1,79 @@
-import { serve } from './deps.js';
+import { createClient, commandOptions } from './deps.js';
 import { grade } from './services/gradingService.js';
 
-const handleRequest = async (request) => {
-  // get json obj of request
-  const requestData = await request.json();
+const consumerName = crypto.randomUUID();
 
-  console.log('Request data:');
-  console.log(requestData);
+const client = createClient({
+  url: 'redis://redis:6379',
+  pingInterval: 1000,
+});
 
-  const code = requestData.code;
-  const testCode = requestData.testCode;
+await client.connect();
 
-  const result = await grade(code, testCode);
+try {
+  await client.XGROUP_CREATE(
+    'assignment_submissions',
+    'assignment_submissions_group',
+    '0',
+    {
+      MKSTREAM: true,
+    }
+  );
+  console.log('Created consumer group.');
+} catch (_e) {
+  console.log('Consumer group already exists, skipped creation.');
+}
 
-  return new Response(JSON.stringify({ result: result }));
-};
+console.log(`Starting consumer submissions-${consumerName}.`);
 
-const portConfig = { port: 7000, hostname: '0.0.0.0' };
-serve(handleRequest, portConfig);
+while (true) {
+  try {
+    const response = await client.XREADGROUP(
+      commandOptions({
+        isolated: true,
+      }),
+      'assignment_submissions_group',
+      consumerName,
+      [
+        {
+          key: 'assignment_submissions',
+          id: '>',
+        },
+      ],
+      {
+        COUNT: 1,
+        BLOCK: 5000,
+      }
+    );
+
+    if (response) {
+      const id = response[0].messages[0].id;
+      await client.XACK(
+        'assignment_submissions',
+        'assignment_submissions_group',
+        id
+      );
+      console.log(`Acknowledged processing of entry ${id}.`);
+
+      const submissionData = response[0].messages[0].message;
+      const { code, testCode, submissionId, user } = submissionData;
+
+      const feedback = await grade(code, testCode);
+
+      const resultObject = {
+        code,
+        feedback,
+        submissionId,
+        user,
+      };
+
+      console.log(resultObject);
+
+      await client.XADD('submission_results', '*', resultObject);
+    } else {
+      console.log('No new grader api stream entries.');
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}

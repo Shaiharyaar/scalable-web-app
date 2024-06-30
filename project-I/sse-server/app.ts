@@ -1,23 +1,24 @@
-import { Router, Application } from './deps.js';
+import { Router, Application, ServerSentEvent } from './deps.js';
 
 const clients = new Map();
-let uuid = '';
 const app = new Application();
 const router = new Router();
 
-const deleteClient = (client, debug = '') => {
-  for (const [key, value] of clients.entries()) {
-    if (value == client) {
-      console.log(debug);
-      clients.delete(key);
-      break;
-    }
-  }
+const worker = new Worker(new URL('./worker.js', import.meta.url), {
+  type: 'module',
+});
+
+worker.postMessage('Start');
+
+worker.onmessage = ({ data }) => {
+  console.log({ data });
+  const target = clients.get(data.user_uuid);
+  const message = new ServerSentEvent('submission_results', { data });
+  target?.dispatchEvent(message);
 };
 
 router.get('/', (ctx) => {
   const user = ctx.request.url.searchParams.get('user');
-  uuid = user;
   console.log(user);
   const target = ctx.sendEvents();
 
@@ -25,17 +26,12 @@ router.get('/', (ctx) => {
   clients.set(user, target);
 
   target.addEventListener('close', () => {
-    deleteClient(target, 'del');
     console.log('Connection closed');
   });
 
-  target.dispatchMessage({ hello: 'world' });
-});
+  const e = new ServerSentEvent('init', { data: 'hello from server' });
 
-router.get('/ping', (ctx) => {
-  const target = clients.get(uuid);
-  target.dispatchMessage({ hello: 'MORORORORO' });
-  return (ctx.response.status = 200);
+  target.dispatchEvent(e);
 });
 
 app.use(router.routes());

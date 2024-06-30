@@ -1,15 +1,5 @@
 import { sql } from '../database/database.js';
 
-const getAll = async () => {
-  return await sql`SELECT * FROM programming_assignments;`;
-};
-
-const findByNumber = async (number) => {
-  const [assignment] =
-    await sql`SELECT * FROM programming_assignments WHERE assignment_order = ${number};`;
-  return assignment;
-};
-
 const addAssignment = async (title, assignment_order, handout, test_code) => {
   return await sql`
     INSERT INTO programming_assignments (title, assignment_order, handout, test_code) VALUES 
@@ -55,8 +45,6 @@ const checkForPendingSubmissions = async (user_uuid) => {
 };
 
 export {
-  getAll,
-  findByNumber,
   addAssignment,
   postSubmission,
   getSubmissionsByUser,
