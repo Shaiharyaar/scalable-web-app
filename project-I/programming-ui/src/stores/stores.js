@@ -1,10 +1,10 @@
 import { readable, writable } from 'svelte/store';
 
-let user = localStorage.getItem('@userId');
+let user = localStorage.getItem('userUuid');
 
 if (!user) {
   user = crypto.randomUUID().toString();
-  localStorage.setItem('@userId', user);
+  localStorage.setItem('userUuid', user);
 }
 
 export const assignments = writable([], async (set) => {
