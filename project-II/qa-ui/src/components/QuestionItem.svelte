@@ -3,7 +3,7 @@
   export let question;
 
   const onQuestionClick = () => {
-    localStorage.setItem('@questionId', question.id);
+    localStorage.setItem('@questionData', JSON.stringify(question));
     window.location.href = '/question';
   };
   console.log({ question });

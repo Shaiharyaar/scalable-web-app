@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
   import Button from './Button.svelte';
   import QuestionList from './QuestionList.svelte';
 
@@ -6,6 +7,10 @@
     alert('clicked');
     console.log('I am clicked');
   };
+
+  onMount(() => {
+    localStorage.removeItem('@questionData');
+  });
 </script>
 
 <div>

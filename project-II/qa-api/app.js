@@ -1,5 +1,6 @@
 import { Application, createClient } from './deps.js';
-import assignmentRouter from './routers/questions.js';
+import questionRouter from './routers/questions.js';
+import answerRouter from './routers/answers.js';
 
 // initiating redis client for stream
 export const client = createClient({
@@ -17,7 +18,8 @@ app.use(async ({ request, state }, next) => {
   await next();
 });
 
-app.use(assignmentRouter.routes());
+app.use(questionRouter.routes());
+app.use(answerRouter.routes());
 
 await app.listen({ port: 7777, hostname: '0.0.0.0' });
 

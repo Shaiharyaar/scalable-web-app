@@ -1,6 +1,9 @@
 ---
 import Layout from '../../layout/Layout.astro';
-import QuestionsView from '../../components/QuestionsView.svelte';
+import QuestionAnswerView from '../../components/QuestionAnswerView.svelte';
 ---
 
-<Layout> Question </Layout>
+<Layout>
+  Question Answers
+  <QuestionAnswerView client:only='svelte' />
+</Layout>
