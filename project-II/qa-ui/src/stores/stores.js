@@ -25,7 +25,8 @@ const getQuestions = async () => {
 
 export const updatedQuestions = async () => {
   const data = await getQuestions();
-  assignments.set(data);
+  console.log({ data });
+  questions.set(data);
 };
 
 export const answers = writable([]);

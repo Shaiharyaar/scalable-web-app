@@ -1,4 +1,5 @@
 import { client as redis } from '../app.js';
+import * as qService from '../services/questions.js';
 
 const cacheMethodCalls = (object, methodsToFlushCacheWith = []) => {
   const handler = {
@@ -26,4 +27,6 @@ const cacheMethodCalls = (object, methodsToFlushCacheWith = []) => {
   return new Proxy(object, handler);
 };
 
-export { cacheMethodCalls };
+const questionService = cacheMethodCalls(qService, ['addQuestion']);
+
+export { questionService };

@@ -1,6 +1,7 @@
 <script>
   import { onDestroy, onMount } from 'svelte';
   import { userUuid } from '../stores/stores';
+  import AnswerList from './AnswerList.svelte';
 
   let question;
   let answersList = [];
@@ -41,14 +42,10 @@
 
   {#if question}
     <h4>{question.title}</h4>
-    <p>{question.body}</p>
+    <p>{question.text}</p>
   {/if}
 
   Answers list
 
-  {#each answersList as answer}
-    <div>
-      {answer.body}
-    </div>
-  {/each}
+  <AnswerList answers={answersList} />
 </div>

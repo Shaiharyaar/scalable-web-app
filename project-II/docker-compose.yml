@@ -11,6 +11,7 @@ services:
     depends_on:
       - qa-api
       - qa-ui
+      - sse-server
     ports:
       - 7800:7800
 
@@ -40,6 +41,7 @@ services:
       - 3000
     depends_on:
       - qa-api
+      - sse-server
 
   llm-api:
     build: llm-api
@@ -64,6 +66,21 @@ services:
     command: -connectRetries=60 -baselineOnMigrate=true migrate
     env_file:
       - project.env
+  
+  sse-server:
+    build: sse-server
+    image: sse-server
+    restart: "no"
+    volumes:
+      - ./sse-server/:/app
+      - ./app-cache/:/app-cache
+    expose:
+      - 5050
+    env_file:
+      - project.env
+    depends_on:
+      - redis
+      - database
 
   e2e-playwright:
     entrypoint: "/bin/true"

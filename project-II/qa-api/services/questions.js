@@ -6,11 +6,12 @@ SELECT
     q.question_id,
     q.user_uuid,
     q.title,
-    q.body,
+    q.text,
     q.created_at,
     COALESCE(qu.upvote_count, 0) AS total_upvotes,
     COALESCE(a.answer_count, 0) AS total_answers,
-    CASE WHEN qup.question_id IS NOT NULL THEN TRUE ELSE FALSE END AS user_upvoted
+    COALESCE(MAX(qup.upvoted_at), q.created_at) AS recent_activity,
+    CASE WHEN qup_user.question_id IS NOT NULL THEN TRUE ELSE FALSE END AS user_upvoted
 FROM 
     questions q
 LEFT JOIN 
@@ -29,9 +30,29 @@ LEFT JOIN
     question_upvotes qup
 ON 
     q.question_id = qup.question_id
-    AND qup.user_uuid = ${user_id};
-
+LEFT JOIN 
+    question_upvotes qup_user
+ON 
+    q.question_id = qup_user.question_id
+    AND qup_user.user_uuid = ${user_id}
+GROUP BY 
+    q.question_id, qu.upvote_count, a.answer_count, qup_user.question_id
+ORDER BY 
+    recent_activity DESC;
 `;
 };
 
-export { getAllSorted };
+const addQuestion = async (user_uuid, title, text) => {
+  return await sql`
+      INSERT INTO questions (user_uuid, title, text, created_at)
+      VALUES (${user_uuid}, ${title}, ${text}, CURRENT_TIMESTAMP)
+      RETURNING question_id;
+    `;
+};
+
+const addUpvote = async (question_id, user_uuid) => {
+  return await sql`INSERT INTO question_upvotes (question_id, user_uuid, upvoted_at) 
+    VALUES (${question_id}, ${user_uuid}, CURRENT_TIMESTAMP) RETURNING question_id`;
+};
+
+export { getAllSorted, addQuestion, addUpvote };
