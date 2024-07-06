@@ -29,7 +29,7 @@
   };
 </script>
 
-<button class={'flex flex-1 flex-col border-1'} on:click={onQuestionClick}>
+<div class={'flex flex-1 flex-col border-1'}>
   <p>
     {answer.text}
   </p>
@@ -39,4 +39,4 @@
       <p>{answer.user_upvoted ? 'Upvoted' : 'Upvote'}</p>
     </button>
   </div>
-</button>
+</div>

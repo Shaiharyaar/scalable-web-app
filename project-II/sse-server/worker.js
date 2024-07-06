@@ -1,4 +1,5 @@
-import { createClient, commandOptions } from './deps.js';
+import { sql } from './database/database.js';
+import { createClient, commandOptions, postgres } from './deps.js';
 
 const consumerName = crypto.randomUUID();
 
@@ -58,7 +59,26 @@ self.onmessage = async () => {
         await client.XACK('submission_results', 'submission_results_group', id);
 
         const resultData = response[0].messages[0].message;
+        console.log({ resultData });
         try {
+          const { user, questionId, text, questionAdded } = resultData ?? {};
+          if (questionAdded) {
+            for (let index = 0; index < 3; index++) {
+              const res = await fetch('http://llm-api:7000/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question: resultData.text }),
+              });
+              let genAnsArr = await res.json();
+              if (genAnsArr && genAnsArr[0]?.generated_text) {
+                await sql`INSERT INTO answers (question_id, user_uuid, text, created_at)
+                    VALUES (${questionId}, ${user}, ${text}, CURRENT_TIMESTAMP)
+                    RETURNING answer_id;`;
+              }
+            }
+          }
           self.postMessage(resultData);
         } catch (error) {
           console.error(error);

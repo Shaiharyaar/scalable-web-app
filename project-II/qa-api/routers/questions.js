@@ -26,6 +26,7 @@ router.post('/questions', async ({ request, response, state }) => {
     title,
     text,
     questionId: `${questionId}`,
+    questionAdded: 'true',
     feedback: 'Question has been added',
   };
 
@@ -58,27 +59,5 @@ router.post(
     return (response.status = 200);
   }
 );
-
-// const generateThreeAnswers = async (data) => {
-//   for (let index = 0; index < 3; index++) {
-//     const res = await fetch('http://llm-api:7000/', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({ question: data.text }),
-//     });
-
-//     let genAnsArr = await res.json();
-//     if (genAnsArr && genAnsArr[0]?.generated_text) {
-//       await answerService.addAnswer(
-//         questionId,
-//         user,
-//         genAnsArr[0].generated_text
-//       );
-//     }
-//   }
-//   await client.XADD('submission_results', '*', { updateRequired: true });
-// };
 
 export default router;
