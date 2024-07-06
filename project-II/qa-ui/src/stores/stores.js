@@ -29,6 +29,10 @@ export const updatedQuestions = async () => {
   questions.set(data);
 };
 
+export const setQuestions = async (list) => {
+  questions.set(list);
+};
+
 export const answers = writable([]);
 
 const getAnswers = async (questionId) => {

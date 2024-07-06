@@ -32,12 +32,13 @@ router.post(
       user,
       questionId,
       answerId: `${answerId}`,
+      answerAdded: 'true',
       feedback: 'Answer has been added',
     };
 
     console.log('adding in submission_results redis stream');
 
-    await client.XADD('submission_results', '*', data);
+    await client.XADD('answer_submission', '*', data);
 
     return (response.status = 200);
   }
@@ -57,12 +58,13 @@ router.post(
       user,
       questionId,
       answerId,
+      isUpvoted: 'true',
       feedback: 'Answer has been upvoted',
     };
 
     console.log('adding in submission_results redis stream');
 
-    await client.XADD('submission_results', '*', data);
+    await client.XADD('answer_submission', '*', data);
 
     return (response.status = 200);
   }

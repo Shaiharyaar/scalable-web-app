@@ -32,7 +32,7 @@ router.post('/questions', async ({ request, response, state }) => {
 
   console.log('adding in submission_results redis stream');
 
-  await client.XADD('submission_results', '*', data);
+  await client.XADD('question_submission', '*', data);
 
   return (response.status = 200);
 });
@@ -52,9 +52,9 @@ router.post(
       feedback: 'Question has been upvoted',
     };
 
-    console.log('adding in submission_results redis stream');
+    console.log('adding in question_submission redis stream');
 
-    await client.XADD('submission_results', '*', data);
+    await client.XADD('question_submission', '*', data);
 
     return (response.status = 200);
   }

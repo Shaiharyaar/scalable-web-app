@@ -1,5 +1,10 @@
 <script>
-  import { updatedQuestions, userUuid } from '../stores/stores';
+  import {
+    questions,
+    setQuestions,
+    updatedQuestions,
+    userUuid,
+  } from '../stores/stores';
   import { onMount, onDestroy } from 'svelte';
   import Button from './Button.svelte';
   import QuestionList from './QuestionList.svelte';
@@ -37,6 +42,34 @@
     source.addEventListener('question_submission', async (e) => {
       const obj = JSON.parse(event.data);
       if (obj.shouldUpdateQuestions || obj.updateRequired) {
+        await updatedQuestions();
+        return;
+      }
+    });
+
+    source.addEventListener('answer_submission', async (e) => {
+      const obj = JSON.parse(event.data);
+      console.log({ obj });
+      if (obj.answerAdded) {
+        let updatedQuestions = $questions.map((question) => {
+          if (question.question_id == obj.questionId) {
+            return {
+              ...question,
+              total_answers: Number(question.total_answers) + 1,
+            };
+          } else {
+            return question;
+          }
+        });
+        setQuestions(updatedQuestions);
+        return;
+      }
+    });
+
+    source.addEventListener('answer_submission', async (e) => {
+      const obj = JSON.parse(event.data);
+      console.log({ obj });
+      if (obj.answersAdded) {
         await updatedQuestions();
         return;
       }

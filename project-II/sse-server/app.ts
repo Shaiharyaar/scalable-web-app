@@ -4,15 +4,18 @@ const clients = new Map();
 const app = new Application();
 const router = new Router();
 
-const worker = new Worker(new URL('./worker.js', import.meta.url), {
-  type: 'module',
-});
+const questionWorker = new Worker(
+  new URL('./workers/question.js', import.meta.url),
+  {
+    type: 'module',
+  }
+);
 
-worker.postMessage('Start');
+questionWorker.postMessage('Question worker service Start');
 
-worker.onmessage = ({ data }) => {
-  for (const [user, target] of clients.entries()) {
-    if (user === data.user) {
+questionWorker.onmessage = ({ data }) => {
+  for (const [userId, target] of clients.entries()) {
+    if (userId === data.user) {
       const message = new ServerSentEvent('question_submission', {
         data: {
           ...data,
@@ -21,11 +24,44 @@ worker.onmessage = ({ data }) => {
       });
       target?.dispatchEvent(message);
     } else {
-      const { questionId, ...questionData } = data;
+      const { user, ...questionData } = data;
       const message = new ServerSentEvent('question_submission', {
         data: {
           ...questionData,
           shouldUpdateQuestions: true,
+        },
+      });
+      target?.dispatchEvent(message);
+    }
+  }
+};
+
+const answerWorker = new Worker(
+  new URL('./workers/answer.js', import.meta.url),
+  {
+    type: 'module',
+  }
+);
+
+answerWorker.postMessage('Answer worker service Start');
+
+answerWorker.onmessage = ({ data }) => {
+  console.log({ data });
+  for (const [userId, target] of clients.entries()) {
+    if (userId === data.user) {
+      const message = new ServerSentEvent('answer_submission', {
+        data: {
+          ...data,
+          shouldUpdateAnswers: true,
+        },
+      });
+      target?.dispatchEvent(message);
+    } else {
+      const { user, ...answerData } = data;
+      const message = new ServerSentEvent('answer_submission', {
+        data: {
+          ...answerData,
+          shouldUpdateAnswers: true,
         },
       });
       target?.dispatchEvent(message);
