@@ -1,20 +1,37 @@
 <script>
   import { tick, onDestroy, onMount } from 'svelte';
-  import { userUuid } from '../stores/stores';
+  import {
+    getSubmissionTime,
+    setSubmissionTime,
+    userUuid,
+  } from '../stores/stores';
   import AnswerList from './AnswerList.svelte';
   import Button from './Button.svelte';
+  import AnswerForm from '../forms/AnswerForm.svelte';
 
   let source;
   let question;
+  let answerText = '';
   let answersList = [];
-  let pending = false;
+  let addingAnswer = false;
 
-  const onAddAnswer = async () => {
-    pending = true;
+  const onChangeText = (e) => {
+    answerText = e.target.value;
+  };
+
+  const onAnswerSubmit = async () => {
+    const waitingTime = getSubmissionTime();
+    if (waitingTime > 0) {
+      alert(
+        `You can submit your answer after ${parseInt(waitingTime)} seconds`
+      );
+      return;
+    }
+    addingAnswer = true;
     const data = {
-      text: 'This is my answer',
+      text: answerText,
     };
-
+    setSubmissionTime();
     const response = await fetch(
       `/api/questions/${question.question_id}/answers`,
       {
@@ -83,15 +100,18 @@
     source.addEventListener('answer_submission', async (e) => {
       const obj = JSON.parse(event.data);
       console.log({ obj });
+      if (obj.user === $userUuid && obj.answerAdded) {
+        setTimeout(() => {
+          addingAnswer = false;
+          answerText = '';
+        }, 1000);
+      }
       if (obj.questionId == question.question_id) {
         getAllDetails();
         return;
       }
     });
 
-    source.onmessage = (e) => {
-      console.log({ e });
-    };
     source.addEventListener('init', () => {
       console.log('init triggered');
     });
@@ -112,9 +132,13 @@
     <p>total answers: {question.total_answers}</p>
     <p>total upvotes: {question.total_upvotes}</p>
   {/if}
-
+  <AnswerForm
+    text={answerText}
+    {onChangeText}
+    onSubmit={onAnswerSubmit}
+    loading={addingAnswer}
+  />
   Answers list
-  <Button onClick={onAddAnswer}>Add my answer</Button>
 
   <AnswerList answers={answersList} />
 </div>

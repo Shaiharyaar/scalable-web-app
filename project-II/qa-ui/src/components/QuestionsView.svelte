@@ -1,23 +1,37 @@
 <script>
   import {
+    getSubmissionTime,
     questions,
     setQuestions,
+    setSubmissionTime,
     updatedQuestions,
     userUuid,
   } from '../stores/stores';
   import { onMount, onDestroy } from 'svelte';
-  import Button from './Button.svelte';
   import QuestionList from './QuestionList.svelte';
+  import QuestionForm from '../forms/QuestionForm.svelte';
 
   let source;
+  let addQuestion = false;
+  let addingQuestion;
   // let itemsCount = 2
 
-  const onClick = async () => {
-    const data = {
-      title: 'Question title',
-      text: 'This is my question',
-    };
+  const onQuestionSubmit = async (e) => {
+    e.preventDefault();
+    const waitingTime = getSubmissionTime();
+    if (waitingTime > 0) {
+      alert(
+        `You can submit your question after ${parseInt(waitingTime)} seconds`
+      );
+      return;
+    }
+    addingQuestion = true;
 
+    const data = {
+      title: e.target.title.value,
+      text: e.target.text.value,
+    };
+    setSubmissionTime();
     const response = await fetch('/api/questions', {
       method: 'POST',
       headers: {
@@ -33,6 +47,10 @@
     }
   };
 
+  const toggleQuestionForm = () => {
+    addQuestion = !addQuestion;
+  };
+
   onMount(() => {
     // remove selected question information
     localStorage.removeItem('@questionData');
@@ -41,8 +59,16 @@
 
     source.addEventListener('question_submission', async (e) => {
       const obj = JSON.parse(event.data);
-      if (obj.shouldUpdateQuestions || obj.updateRequired) {
+      console.log({ obj });
+      if (obj.questionAdded) {
         await updatedQuestions();
+        if (obj.user === $userUuid) {
+          // for visual affect and good interactive experience
+          setTimeout(() => {
+            addQuestion = false;
+            addingQuestion = false;
+          }, 1000);
+        }
         return;
       }
     });
@@ -90,6 +116,56 @@
 </script>
 
 <div>
-  <Button {onClick}>Add my question</Button>
+  <div class="flex w-full justify-end">
+    <button
+      class="px-4 py-2 flex flex-row justify-center font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-lg select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+      type="button"
+      on:click={toggleQuestionForm}
+    >
+      {#if addQuestion}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={3}
+          stroke="currentColor"
+          className="size-1 mr-2"
+          height={16}
+          width={16}
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18 18 6M6 6l12 12"
+          />
+        </svg>
+
+        Close
+      {:else}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={3}
+          stroke="currentColor"
+          className="size-1 mr-2"
+          height={16}
+          width={16}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 4.5v15m7.5-7.5h-15"
+          />
+        </svg>
+
+        Add Question
+      {/if}
+    </button>
+  </div>
+  {#if addQuestion}
+    <QuestionForm loading={addingQuestion} onSubmit={onQuestionSubmit} />
+  {/if}
+
   <QuestionList />
 </div>

@@ -51,4 +51,28 @@ export const updatedAnswers = async (questionId) => {
   assignments.set(data);
 };
 
+export const setSubmissionTime = () => {
+  let dateTime = new Date();
+  dateTime = dateTime.toISOString();
+
+  localStorage.setItem('submissionTime', dateTime);
+};
+
+export const getSubmissionTime = () => {
+  let submissionTime = localStorage.getItem('submissionTime');
+  if (!submissionTime) return 0;
+
+  let currentTime = new Date();
+  submissionTime = new Date(submissionTime);
+
+  let timeDifferenceInSeconds = (currentTime - submissionTime) / 1000;
+
+  if (timeDifferenceInSeconds > 60) {
+    localStorage.removeItem('submissionTime');
+    return 0;
+  } else {
+    return 60 - timeDifferenceInSeconds;
+  }
+};
+
 export const userUuid = readable(user);
