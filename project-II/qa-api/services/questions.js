@@ -1,6 +1,6 @@
 import { sql } from '../database/database.js';
 
-const getAllSorted = async (user_id) => {
+const getAllSorted = async (user_id, count) => {
   return await sql`
 SELECT 
     q.question_id,
@@ -38,7 +38,8 @@ ON
 GROUP BY 
     q.question_id, qu.upvote_count, a.answer_count, qup_user.question_id
 ORDER BY 
-    recent_activity DESC;
+    recent_activity DESC
+LIMIT ${count};
 `;
 };
 

@@ -7,14 +7,14 @@
     updatedQuestions,
     userUuid,
   } from '../stores/stores';
-  import { onMount, onDestroy } from 'svelte';
+  import { tick, onMount, onDestroy } from 'svelte';
   import QuestionList from './QuestionList.svelte';
   import QuestionForm from '../forms/QuestionForm.svelte';
 
   let source;
   let addQuestion = false;
   let addingQuestion;
-  // let itemsCount = 2
+  let itemsCount = 20;
 
   const onQuestionSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +32,7 @@
       text: e.target.text.value,
     };
     setSubmissionTime();
-    const response = await fetch('/api/questions', {
+    const response = await fetch(`/api/questions/${itemsCount}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,17 +51,31 @@
     addQuestion = !addQuestion;
   };
 
+  const onscroll = async () => {
+    const scrolledTo = window.scrollY + window.innerHeight;
+    const threshold = 0;
+    const isReachBottom = document.body.scrollHeight - threshold <= scrolledTo;
+    if (isReachBottom) {
+      if ($questions.length < itemsCount) return;
+      itemsCount += 20;
+      await tick();
+      await updatedQuestions(itemsCount);
+      return;
+    }
+  };
+
   onMount(() => {
     // remove selected question information
     localStorage.removeItem('@questionData');
-
+    window.addEventListener('scroll', onscroll);
+    // handleQuestionsListScroll();
     source = new EventSource(`/sse/?user=${$userUuid}`);
 
     source.addEventListener('question_submission', async (e) => {
       const obj = JSON.parse(event.data);
       console.log({ obj });
       if (obj.questionAdded) {
-        await updatedQuestions();
+        await updatedQuestions(itemsCount);
         if (obj.user === $userUuid) {
           // for visual affect and good interactive experience
           setTimeout(() => {
@@ -96,12 +110,13 @@
       const obj = JSON.parse(event.data);
       console.log({ obj });
       if (obj.answersAdded) {
-        await updatedQuestions();
+        await updatedQuestions(itemsCount);
         return;
       }
     });
 
     source.onmessage = (e) => {
+      window.removeEventListener('scroll', onscroll);
       console.log({ e });
     };
     source.addEventListener('init', () => {

@@ -12,9 +12,13 @@ await client.connect();
 
 const app = new Application();
 
-app.use(async ({ request, state }, next) => {
+app.use(async ({ request, response, state }, next) => {
   console.log('hit');
-  state.user = request.headers.get('Authorization');
+  const userId = request.headers.get('Authorization');
+  if (!userId) {
+    return (response.status = 401);
+  }
+  state.user = userId;
   await next();
 });
 

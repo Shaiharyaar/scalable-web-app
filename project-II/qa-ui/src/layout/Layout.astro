@@ -10,7 +10,7 @@ import Header from './Header.svelte';
     <meta name='generator' content={Astro.generator} />
     <title>Questions and answers</title>
   </head>
-  <body>
+  <body id='body-scroll-id' class='h-screen'>
     <Header client:only={'svelte'} />
     <div class='container mx-auto'>
       <slot />

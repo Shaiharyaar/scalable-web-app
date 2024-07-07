@@ -5,11 +5,11 @@ import { client } from '../app.js';
 const router = new Router();
 
 router.get(
-  `/questions/:questionId/answers`,
-  async ({ request, response, params, state }) => {
+  `/questions/:questionId/answers/:count`,
+  async ({ response, params, state }) => {
     const { user } = state;
-    const { questionId } = params;
-    const answers = await answerService.getAllSorted(user, questionId);
+    const { count, questionId } = params;
+    const answers = await answerService.getAllSorted(user, questionId, count);
     response.body = answers;
   }
 );

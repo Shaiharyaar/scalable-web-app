@@ -5,9 +5,10 @@ import * as questionService from '../services/questions.js';
 
 const router = new Router();
 
-router.get('/questions', async ({ response, state }) => {
+router.get('/questions/:count', async ({ response, params, state }) => {
   const { user } = state;
-  const questions = await questionService.getAllSorted(user);
+  const { count } = params;
+  const questions = await questionService.getAllSorted(user, count);
   response.body = questions;
 });
 
@@ -39,7 +40,7 @@ router.post('/questions', async ({ request, response, state }) => {
 
 router.post(
   '/questions/:questionId/upvote',
-  async ({ request, response, params, state }) => {
+  async ({ response, params, state }) => {
     const { questionId } = params;
     const { user } = state;
 

@@ -8,12 +8,12 @@ if (!user) {
 }
 
 export const questions = writable([], async (set) => {
-  const data = await getQuestions();
+  const data = await getQuestions(20);
   set(data);
 });
 
-const getQuestions = async () => {
-  const response = await fetch('/api/questions/', {
+const getQuestions = async (count) => {
+  const response = await fetch(`/api/questions/${count}`, {
     headers: {
       Authorization: user,
     },
@@ -23,8 +23,8 @@ const getQuestions = async () => {
   return data;
 };
 
-export const updatedQuestions = async () => {
-  const data = await getQuestions();
+export const updatedQuestions = async (count) => {
+  const data = await getQuestions(count);
   console.log({ data });
   questions.set(data);
 };

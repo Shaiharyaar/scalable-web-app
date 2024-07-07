@@ -6,7 +6,6 @@
     userUuid,
   } from '../stores/stores';
   import AnswerList from './AnswerList.svelte';
-  import Button from './Button.svelte';
   import AnswerForm from '../forms/AnswerForm.svelte';
 
   let source;
@@ -14,6 +13,7 @@
   let answerText = '';
   let answersList = [];
   let addingAnswer = false;
+  let itemsCount = 20;
 
   const onChangeText = (e) => {
     answerText = e.target.value;
@@ -52,15 +52,17 @@
   };
 
   const getAnswersList = async (questionId) => {
-    const response = await fetch(`/api/questions/${questionId}/answers`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: $userUuid,
-      },
-    });
+    const response = await fetch(
+      `/api/questions/${questionId}/answers/${itemsCount}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: $userUuid,
+        },
+      }
+    );
 
     const data = await response.json();
-    // await tick();
     question = {
       ...question,
       total_answers: data.length,
@@ -80,8 +82,22 @@
     }
   };
 
+  const onscroll = async () => {
+    const scrolledTo = window.scrollY + window.innerHeight;
+    const threshold = 0;
+    const isReachBottom = document.body.scrollHeight - threshold <= scrolledTo;
+    if (isReachBottom) {
+      if (answersList.length < itemsCount) return;
+      itemsCount += 20;
+      await tick();
+      await getAnswersList(question.question_id);
+      return;
+    }
+  };
+
   onMount(() => {
     getAllDetails();
+    window.addEventListener('scroll', onscroll);
 
     source = new EventSource(`/sse/?user=${$userUuid}`);
 
@@ -119,6 +135,8 @@
 
   onDestroy(() => {
     console.log('question view removed');
+    window.removeEventListener('scroll', onscroll);
+
     source.close();
   });
 </script>
