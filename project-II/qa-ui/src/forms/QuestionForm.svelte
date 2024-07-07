@@ -3,15 +3,16 @@
   export let loading;
 </script>
 
-<form on:submit={onSubmit}>
+<form id={'question-form-id'} on:submit={onSubmit}>
   <div class="mb-5">
-    <label for="base-input" class="block mb-2 text-sm font-medium text-gray-900"
-      >Question Title</label
+    <label
+      for="question-title-input-id"
+      class="block mb-2 text-sm font-medium text-gray-900">Question Title</label
     >
     <input
       name="title"
       type="text"
-      id="base-input"
+      id="question-title-input-id"
       class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
       required
       disabled={loading}
@@ -19,19 +20,20 @@
   </div>
   <div class="mb-5">
     <label
-      for="large-input"
+      for="question-text-input-id"
       class="block mb-2 text-sm font-medium text-gray-900">Your question</label
     >
     <textarea
       name="text"
       type="text"
-      id="large-input"
+      id="question-text-input-id"
       class="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500"
       required
       disabled={loading}
     />
   </div>
   <button
+    id={'question-submit-button-id'}
     disabled={loading}
     type="submit"
     class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-0 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-1.5 text-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"

@@ -7,6 +7,7 @@
   } from '../stores/stores';
   import AnswerList from './AnswerList.svelte';
   import AnswerForm from '../forms/AnswerForm.svelte';
+  import Notification from './Notification.svelte';
 
   let source;
   let question;
@@ -14,6 +15,7 @@
   let answersList = [];
   let addingAnswer = false;
   let itemsCount = 20;
+  let showNotification = false;
 
   const onChangeText = (e) => {
     answerText = e.target.value;
@@ -120,6 +122,10 @@
         setTimeout(() => {
           addingAnswer = false;
           answerText = '';
+          showNotification = true;
+          setTimeout(() => {
+            showNotification = false;
+          }, 5000);
         }, 1000);
       }
       if (obj.questionId == question.question_id) {
@@ -142,6 +148,7 @@
 </script>
 
 <div>
+  <Notification show={showNotification} text={'Answer has been submitted'} />
   <h1>Question</h1>
 
   {#if question}

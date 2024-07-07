@@ -29,8 +29,8 @@
   };
 </script>
 
-<div class={'flex flex-1 flex-col border-1'}>
-  <p>
+<div class={'flex flex-1 flex-col border-1 answer-item'}>
+  <p id={'answer-text-id'}>
     {answer.text}
   </p>
   <div class="flex w-full flex-row justify-between">

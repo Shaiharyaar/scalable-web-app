@@ -33,9 +33,12 @@
   };
 </script>
 
-<button class={'flex flex-1 flex-col border-1'} on:click={onQuestionClick}>
-  <h4>{question.title}</h4>
-  <p>
+<button
+  class={'flex flex-1 flex-col border-1 question-item'}
+  on:click={onQuestionClick}
+>
+  <h4 id={'question-title-id'}>{question.title}</h4>
+  <p id={'question-text-id'}>
     {question.text}
   </p>
   <div class="flex w-full flex-row justify-between">

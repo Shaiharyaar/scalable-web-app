@@ -10,11 +10,13 @@
   import { tick, onMount, onDestroy } from 'svelte';
   import QuestionList from './QuestionList.svelte';
   import QuestionForm from '../forms/QuestionForm.svelte';
+  import Notification from './Notification.svelte';
 
   let source;
   let addQuestion = false;
   let addingQuestion;
   let itemsCount = 20;
+  let showNotification = false;
 
   const onQuestionSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +34,7 @@
       text: e.target.text.value,
     };
     setSubmissionTime();
-    const response = await fetch(`/api/questions/${itemsCount}`, {
+    const response = await fetch(`/api/questions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -81,6 +83,10 @@
           setTimeout(() => {
             addQuestion = false;
             addingQuestion = false;
+            showNotification = true;
+            setTimeout(() => {
+              showNotification = false;
+            }, 5000);
           }, 1000);
         }
         return;
@@ -131,8 +137,10 @@
 </script>
 
 <div>
+  <Notification show={showNotification} text={'Question has been added'} />
   <div class="flex w-full justify-end">
     <button
+      id={'show-question-form-id'}
       class="px-4 py-2 flex flex-row justify-center font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-lg select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
       type="button"
       on:click={toggleQuestionForm}
