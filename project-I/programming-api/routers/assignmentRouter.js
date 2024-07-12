@@ -8,7 +8,7 @@ const router = new Router();
 
 const assignmentCachedService = cacheMethodCalls(assignmentService, []);
 
-router.get('/getAssignments', async ({ response, state }) => {
+router.get('/assignments', async ({ response, state }) => {
   const { user } = state;
   const assignments = await assignmentCachedService.getAll();
   const submissions = await assignmentSubmissionService.getSubmissionsByUser(

@@ -13,7 +13,7 @@ export const assignments = writable([], async (set) => {
 });
 
 const getAssignments = async () => {
-  const response = await fetch('/api/getAssignments', {
+  const response = await fetch('/api/assignments', {
     headers: {
       Authorization: user,
     },
