@@ -35,22 +35,6 @@ export const setQuestions = async (list) => {
 
 export const answers = writable([]);
 
-const getAnswers = async (questionId) => {
-  const response = await fetch(`/api/questions/${questionId}/answers`, {
-    headers: {
-      Authorization: user,
-    },
-  });
-
-  const data = await response.json();
-  return data;
-};
-
-export const updatedAnswers = async (questionId) => {
-  const data = await getAnswers(questionId);
-  assignments.set(data);
-};
-
 export const setSubmissionTime = () => {
   let dateTime = new Date();
   dateTime = dateTime.toISOString();

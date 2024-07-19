@@ -1,6 +1,6 @@
 import { Router } from '../deps.js';
-import * as answerService from '../services/answers.js';
 import { client } from '../app.js';
+import { answerService } from '../utils/cacheUtil.js';
 
 const router = new Router();
 

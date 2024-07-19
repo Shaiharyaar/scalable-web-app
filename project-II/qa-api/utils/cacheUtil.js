@@ -1,5 +1,7 @@
-import { client as redis } from '../app.js';
 import * as qService from '../services/questions.js';
+import * as ansService from '../services/answers.js';
+
+const cache = new Map();
 
 const cacheMethodCalls = (object, methodsToFlushCacheWith = []) => {
   const handler = {
@@ -7,19 +9,17 @@ const cacheMethodCalls = (object, methodsToFlushCacheWith = []) => {
       const method = module[methodName];
       return async (...methodArgs) => {
         if (methodsToFlushCacheWith.includes(methodName)) {
-          await redis.flushDb();
+          cache.clear();
           return await method.apply(this, methodArgs);
         }
 
         const cacheKey = `${methodName}-${JSON.stringify(methodArgs)}`;
-        const cacheResult = await redis.get(cacheKey);
-        if (!cacheResult) {
-          const result = await method.apply(this, methodArgs);
-          await redis.set(cacheKey, JSON.stringify(result));
-          return result;
+
+        if (!cache.has(cacheKey)) {
+          cache.set(cacheKey, await method.apply(this, methodArgs));
         }
 
-        return JSON.parse(cacheResult);
+        return cache.get(cacheKey);
       };
     },
   };
@@ -27,6 +27,11 @@ const cacheMethodCalls = (object, methodsToFlushCacheWith = []) => {
   return new Proxy(object, handler);
 };
 
-const questionService = cacheMethodCalls(qService, ['addQuestion']);
+const questionService = cacheMethodCalls(qService, [
+  'addQuestion',
+  'addAnswer',
+  'addUpvote',
+]);
+const answerService = cacheMethodCalls(ansService, ['addAnswer', 'addUpvote']);
 
-export { questionService };
+export { questionService, answerService };

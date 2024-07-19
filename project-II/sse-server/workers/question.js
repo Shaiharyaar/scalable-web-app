@@ -1,5 +1,5 @@
 import { sql } from '../database/database.js';
-import { createClient, commandOptions, postgres } from '../deps.js';
+import { createClient, commandOptions } from '../deps.js';
 
 const consumerName = crypto.randomUUID();
 
@@ -67,6 +67,7 @@ self.onmessage = async () => {
         try {
           self.postMessage(resultData);
           const { user, questionId, questionAdded } = resultData ?? {};
+          let autoGenAnsAdded = 'false';
           if (questionAdded) {
             for (let index = 0; index < 3; index++) {
               const res = await fetch('http://llm-api:7000/', {
@@ -81,11 +82,14 @@ self.onmessage = async () => {
                 await sql`INSERT INTO answers (question_id, user_uuid, text, created_at)
                     VALUES (${questionId}, ${user}, ${genAnsArr[0]?.generated_text}, CURRENT_TIMESTAMP)
                     RETURNING answer_id;`;
+                autoGenAnsAdded = 'true';
               }
             }
           }
           await client.XADD('answer_submission', '*', {
             answersAdded: 'true',
+            autoGenAnsAdded,
+            questionId,
           });
         } catch (error) {
           console.error(error);

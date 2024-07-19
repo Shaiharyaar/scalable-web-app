@@ -3,7 +3,7 @@
   export let loading;
 </script>
 
-<form id={'question-form-id'} on:submit={onSubmit}>
+<form id={'question-form-id'} class="px-10" on:submit={onSubmit}>
   <div class="mb-5">
     <label
       for="question-title-input-id"

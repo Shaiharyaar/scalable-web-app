@@ -46,7 +46,6 @@ const answerWorker = new Worker(
 answerWorker.postMessage('Answer worker service Start');
 
 answerWorker.onmessage = ({ data }) => {
-  console.log({ data });
   for (const [userId, target] of clients.entries()) {
     if (userId === data.user) {
       const message = new ServerSentEvent('answer_submission', {

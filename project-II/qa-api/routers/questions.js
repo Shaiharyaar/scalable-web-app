@@ -1,7 +1,6 @@
 import { Router } from '../deps.js';
 import { client } from '../app.js';
-import * as questionService from '../services/questions.js';
-// import { questionService } from '../utils/cacheUtil.js';
+import { questionService } from '../utils/cacheUtil.js';
 
 const router = new Router();
 

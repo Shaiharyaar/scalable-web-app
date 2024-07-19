@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sse-server-deployment
+  labels:
+    app: sse-server
+spec:
+  selector:
+    matchLabels:
+      app: sse-server
+  template:
+    metadata:
+      labels:
+        app: sse-server
+    spec:
+      containers:
+        - name: sse-server
+          image: sse-server:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5050

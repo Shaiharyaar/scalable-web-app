@@ -68,7 +68,7 @@ BEGIN
     FOR i IN 1..60 LOOP
         INSERT INTO questions (user_uuid, title, text)
         VALUES (
-            user_uuids[ceil(random() * array_length(user_uuids, 1))::int],
+            i,
             question_titles[(i - 1) % array_length(question_titles, 1) + 1],
             'Please provide detailed information on the topic.'
         );

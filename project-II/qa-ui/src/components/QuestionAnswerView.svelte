@@ -72,6 +72,10 @@
     answersList = data;
   };
 
+  const goBack = () => {
+    window.location.href = '/';
+  };
+
   const getAllDetails = () => {
     const data = localStorage.getItem('@questionData');
     if (data) {
@@ -149,21 +153,51 @@
 
 <div>
   <Notification show={showNotification} text={'Answer has been submitted'} />
-  <h1>Question</h1>
-
-  {#if question}
-    <h4>{question.title}</h4>
-    <p>{question.text}</p>
-    <p>total answers: {question.total_answers}</p>
-    <p>total upvotes: {question.total_upvotes}</p>
-  {/if}
-  <AnswerForm
-    text={answerText}
-    {onChangeText}
-    onSubmit={onAnswerSubmit}
-    loading={addingAnswer}
-  />
-  Answers list
-
+  <div class={'flex flex-1 flex-col  p-10 relative'}>
+    {#if question}
+      <div class={'flex items-center gap-5 mb-5'}>
+        <button on:click={goBack}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-8"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+            />
+          </svg>
+        </button>
+        <h1 class="text-4xl font-bold tracking-tight text-gray-900">
+          Question
+        </h1>
+      </div>
+      <h4 class="mb-2 text-xl font-bold tracking-tight text-gray-900">
+        {question.title}
+      </h4>
+      <p class="mb-2 font-normal tracking-tight text-gray-600">
+        {question.text}
+      </p>
+      <div class="flex w-full flex-row justify-end gap-10 my-5">
+        <p>
+          {question.total_answers}{answersList.length < itemsCount ? '' : '+'} Answers
+        </p>
+        <div class={`flex gap-4`}>
+          {question.total_upvotes}
+          Upvotes
+        </div>
+      </div>
+    {/if}
+    <AnswerForm
+      text={answerText}
+      {onChangeText}
+      onSubmit={onAnswerSubmit}
+      loading={addingAnswer}
+    />
+  </div>
   <AnswerList answers={answersList} />
 </div>
